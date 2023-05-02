@@ -20,13 +20,15 @@ function QuoteCard({ quote }: QuoteCardProps) {
     }, [quote._id]);
 
     // Обновляем значение лайков при нажатии на кнопку и сохраняем его в локальном хранилище
-    const likeHandler = () => {
+    const likeHandler = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation(); // предотвращаем распространение события
         const newLikes = likes + 1;
         setLikes(newLikes);
         localStorage.setItem(`likes-${quote._id}`, String(newLikes));
     };
 
-    const dislikeHandler = () => {
+    const dislikeHandler = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation(); // предотвращаем распространение события
         const newLikes = likes - 1;
         setLikes(newLikes);
         localStorage.setItem(`likes-${quote._id}`, String(newLikes));
@@ -35,7 +37,7 @@ function QuoteCard({ quote }: QuoteCardProps) {
     const clickHandler = () => navigate(`/quote/${quote._id}`);
 
     return (
-        <div className="border rounded-md py-4 px-6 mb-2 hover:shadow-md hover:transition-all cursor-pointer">
+        <div className="border rounded-md py-4 px-6 mb-2 hover:shadow-md hover:transition-all cursor-pointer " onClick={clickHandler}>
             <p className="text-lg font-bold">
                 {quote.author}:&nbsp;
             </p>

@@ -10,6 +10,8 @@ const ITEMS_PER_PAGE = 25
 
 function MainPage() {
 
+
+
     const dispatch = useAppDispatch()
 
     const page = useRef(1)
@@ -28,7 +30,7 @@ function MainPage() {
     }, [dispatch])
 
     return (
-        <div className="container mx-auto max-w-[760px] pt-5">
+        <div className="container lg: mx-auto max-w-[760px] pt-5 ; md:  ">
 
             <QuoteSearch/>
 

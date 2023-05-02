@@ -1,32 +1,110 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useInput} from "../hooks/input";
 import {useDebounce} from "../hooks/debounce";
 import axios from "../axios";
 import {IQuote, ServerResponse} from "../models/models";
+import {useNavigate} from "react-router-dom";
 
 
 function QuoteSearch() {
 
+    const navigate = useNavigate()
+
     const input = useInput('')
+
+    const [dropdown, setDropdown] = useState(false)
+
+    const [quotes, setQuotes] = useState<IQuote[]>([])
 
     const debounced = useDebounce<string>(input.value, 400)
 
+    const [filterType, setFilterType] = useState<string>(''); /* может принимать значение 'author' или 'tag'*/
+
+    const [filterValue, setFilterValue] = useState<string>('');
+
+    function handleFilterByAuthor() {
+        setFilterType('author');
+        setFilterValue(input.value);
+    }
+
+    function handleFilterByTag() {
+        setFilterType('tag');
+        setFilterValue(input.value);
+    }
+
     async function searchQuotes() {
-       const response =  await axios.get<ServerResponse<IQuote>>(`https://api.quotable.io/quotes/random`, {params: {search: debounced}})
+        const params: any = {
+            limit: 500,
+            search: debounced,
+            count: 10,
+        };
+
+        if (filterType === 'author') {
+            params.author = filterValue;
+        } else if (filterType === 'tag') {
+            params.tag = filterValue;
+        }
+
+        const response = await axios.get<ServerResponse<IQuote>>('https://api.quotable.io/quotes', {
+            params,
+        });
+
+        const filteredQuotes = response.data.results.filter((quote) => {
+            const contentMatch =
+                quote.content.toLowerCase().includes(debounced.toLowerCase()) ||
+                quote.author.toLowerCase().includes(debounced.toLowerCase());
+
+            const tagsMatch = quote.tags?.some((tag) => tag.toLowerCase().includes(debounced.toLowerCase()));
+
+            return contentMatch || tagsMatch;
+        });
+
+        setQuotes(filteredQuotes);
     }
 
     useEffect( () => {
-        searchQuotes()
+        if (debounced.length > 3) {
+            searchQuotes().then(()=> setDropdown(true))
+        }
+        else {
+            setDropdown(false)
+        }
+        console.log('debounced', debounced)
     }, [debounced])
 
+    const [selectedButton, setSelectedButton] = useState(null);
+
+
     return (
-        <div className="mb-4">
-             <input type="text" className="border py-2 px-4 outline-0 w-full h-[42px]"
-            placeholder="Type something..."
-            {...input}
+        <div className="mb-4 relative" onClick={() => setDropdown(false)}>
+            <div>
+                <button onClick={handleFilterByAuthor} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border
+                border-gray-400 rounded shadow hover: black  focus:outline-none focus:black focus:border-b-gray-600 mr-2" > Фильтр по автору </button>
+                <button onClick={handleFilterByTag} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+                border border-gray-400 rounded shadow hover: black focus:outline-none focus:black focus:border-b-gray-600"> Фильтр по тэгу </button>
+            </div>
+            <input
+                type="text"
+                className="mt-3 border py-2 px-4 outline-0 w-full h-[42px]"
+                placeholder="Type something..."
+                {...input}
             />
 
-            {/*<div className="absolute left-0 right-0 h-[200px] top-[42px] shadow-md"></div>*/}
+            {dropdown && (
+                <ul className="list-none absolute left-0 right-0 h-[200px] top-[42px] shadow-md bg-white overflow-y-scroll z-10">
+                    {quotes.map((quote) => (
+                        <li
+                            key={quote._id}
+                            onClick={() => navigate(`/quote/${quote.content}`)}
+                            className="py-2 px-4 mb-2 hover:bg-gray-400 hover:transition-colors cursor-pointer hover:text-white"
+                        >
+                            {quote.author}:
+                            {quote.content}
+                        </li>
+                    ))}
+                    {quotes.length === 0 && <li>No quotes found</li>}
+                </ul>
+            )}
         </div>
     );
 }

@@ -1,8 +1,10 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
 import quoteReducer from "./slices/quoteSlice"
+import filterReducer from "./slices/filterSlice"
 
 const rootReducer = combineReducers({
-    quote: quoteReducer
+    quote: quoteReducer,
+    filter: filterReducer
 })
 
 export function setupStore() {
