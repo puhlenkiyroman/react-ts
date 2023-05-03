@@ -10,8 +10,6 @@ const ITEMS_PER_PAGE = 25
 
 function MainPage() {
 
-
-
     const dispatch = useAppDispatch()
 
     const page = useRef(1)

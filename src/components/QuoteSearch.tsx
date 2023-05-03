@@ -22,15 +22,6 @@ function QuoteSearch() {
 
     const [filterValue, setFilterValue] = useState<string>('');
 
-    function handleFilterByAuthor() {
-        setFilterType('author');
-        setFilterValue(input.value);
-    }
-
-    function handleFilterByTag() {
-        setFilterType('tag');
-        setFilterValue(input.value);
-    }
 
     async function searchQuotes() {
         const params: any = {
@@ -50,13 +41,14 @@ function QuoteSearch() {
         });
 
         const filteredQuotes = response.data.results.filter((quote) => {
-            const contentMatch =
-                quote.content.toLowerCase().includes(debounced.toLowerCase()) ||
-                quote.author.toLowerCase().includes(debounced.toLowerCase());
+
+            const authorMatch = quote.author.toLowerCase().includes(debounced.toLowerCase());
 
             const tagsMatch = quote.tags?.some((tag) => tag.toLowerCase().includes(debounced.toLowerCase()));
 
-            return contentMatch || tagsMatch;
+            const contentMatch = quote.content.toLowerCase().includes(debounced.toLowerCase());
+
+            return authorMatch || tagsMatch || contentMatch;
         });
 
         setQuotes(filteredQuotes);
@@ -72,26 +64,55 @@ function QuoteSearch() {
         console.log('debounced', debounced)
     }, [debounced])
 
-    const [selectedButton, setSelectedButton] = useState(null);
+    const [selectedButton, setSelectedButton] = useState(false);
 
+    function handleFilterByAuthor() {
+        setFilterType('author');
+        setFilterValue(input.value);
+        setSelectedButton(true);
+    }
+
+    function handleFilterByTag() {
+        setFilterType('tag');
+        setFilterValue(input.value);
+        setSelectedButton(true);
+    }
+
+    function handleFilterByWord() {
+        setFilterType('tag');
+        setFilterValue(input.value);
+        setSelectedButton(true);
+    }
 
     return (
         <div className="mb-4 relative" onClick={() => setDropdown(false)}>
             <div>
                 <button onClick={handleFilterByAuthor} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border
-                border-gray-400 rounded shadow hover: black  focus:outline-none focus:black focus:border-b-gray-600 mr-2" > Фильтр по автору </button>
-                <button onClick={handleFilterByTag} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
-                border border-gray-400 rounded shadow hover: black focus:outline-none focus:black focus:border-b-gray-600"> Фильтр по тэгу </button>
+                border-gray-400 rounded shadow hover: black  focus:outline-none focus:black focus:border-b-gray-600 mr-2" >
+                    Фильтр по автору
+                </button>
+
+                <button onClick={handleFilterByTag} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border
+                border-gray-400 rounded shadow hover: black focus:outline-none focus:black focus:border-b-gray-600 mr-2" >
+                    Фильтр по тэгу
+                </button>
+
+                <button onClick={handleFilterByWord} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border
+                border-gray-400 rounded shadow hover: black  focus:outline-none focus:black focus:border-b-gray-600 mr-2" >
+                    Фильтр по слову
+                </button>
+
             </div>
+
             <input
                 type="text"
-                className="mt-3 border py-2 px-4 outline-0 w-full h-[42px]"
+                className="mt-3 border py-2 px-4 outline-0 w-full h-[42px] hover: black  focus:outline-none focus:black focus:border-b-gray-600"
                 placeholder="Type something..."
                 {...input}
             />
 
             {dropdown && (
-                <ul className="list-none absolute left-0 right-0 h-[200px] top-[42px] shadow-md bg-white overflow-y-scroll z-10">
+                <ul className="list-none absolute left-0 right-0 max-h-[200px] top-[42px] shadow-md bg-white overflow-y-scroll z-10 ">
                     {quotes.map((quote) => (
                         <li
                             key={quote._id}

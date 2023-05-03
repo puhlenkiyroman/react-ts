@@ -4,8 +4,7 @@ import Navigation from "./components/Navigation";
 import MainPage from "./pages/MainPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import QuoteDetailPage from "./pages/QuoteDetailPage";
-import {useAppDispatch} from "./hooks/redux";
-import {fetchFilterQuotes} from "./Store/actions/filterActions";
+import AuthPage from "./pages/AuthPage";
 
 function App() {
   return (
@@ -15,6 +14,7 @@ function App() {
               <Route path ="/" element={ <MainPage /> } />
               <Route path = "/categories" element={ <CategoriesPage/> } />
               <Route path ="/quote/:id" element={ <QuoteDetailPage/> } />
+              <Route path = "/auth" element = { <AuthPage/> } />
           </Routes>
       </>
   );

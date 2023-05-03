@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useParams} from "react-router-dom";
 
 function QuoteDetailPage() {
+
     const params = useParams<'id'>()
 
     return (

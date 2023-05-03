@@ -13,6 +13,3 @@ export interface ServerResponse<T> {
     previous: number
     results: T[]
 }
-
-export type IQuoteQuote = string
-export type IQuoteAuthor = string

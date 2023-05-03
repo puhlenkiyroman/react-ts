@@ -9,7 +9,12 @@ interface QuoteCardProps {
 
 function QuoteCard({ quote }: QuoteCardProps) {
     const navigate = useNavigate();
+
     const [likes, setLikes] = useState(0);
+
+    const [isLiked, setIsLiked] = useState(false);
+
+    const [isDisliked, setIsDisliked] = useState(false);
 
     // Получаем текущее значение лайков из локального хранилища при загрузке компонента
     useEffect(() => {
@@ -21,17 +26,33 @@ function QuoteCard({ quote }: QuoteCardProps) {
 
     // Обновляем значение лайков при нажатии на кнопку и сохраняем его в локальном хранилище
     const likeHandler = (event: React.MouseEvent<HTMLElement>) => {
-        event.stopPropagation(); // предотвращаем распространение события
-        const newLikes = likes + 1;
-        setLikes(newLikes);
-        localStorage.setItem(`likes-${quote._id}`, String(newLikes));
+        event.stopPropagation();
+        if (!isLiked) {
+            const newLikes = Math.min(1, likes + 1); // Ограничиваем значение до 1
+            setLikes(newLikes);
+            localStorage.setItem(`likes-${quote._id}`, String(newLikes));
+            setIsLiked(true);
+            setIsDisliked(false); // Сбрасываем состояние дизлайка
+        } else {
+            setLikes(0);
+            localStorage.removeItem(`likes-${quote._id}`);
+            setIsLiked(false);
+        }
     };
 
     const dislikeHandler = (event: React.MouseEvent<HTMLElement>) => {
-        event.stopPropagation(); // предотвращаем распространение события
-        const newLikes = likes - 1;
-        setLikes(newLikes);
-        localStorage.setItem(`likes-${quote._id}`, String(newLikes));
+        event.stopPropagation();
+        if (!isDisliked) {
+            const newLikes = Math.max(-1, likes - 1); // Ограничиваем значение до -1
+            setLikes(newLikes);
+            localStorage.setItem(`likes-${quote._id}`, String(newLikes));
+            setIsLiked(false); // Сбрасываем состояние лайка
+            setIsDisliked(true);
+        } else {
+            setLikes(0);
+            localStorage.removeItem(`likes-${quote._id}`);
+            setIsDisliked(false);
+        }
     };
 
     const clickHandler = () => navigate(`/quote/${quote._id}`);
@@ -42,7 +63,7 @@ function QuoteCard({ quote }: QuoteCardProps) {
                 {quote.author}:&nbsp;
             </p>
             {quote.content}
-            {quote.tags && <p>Тэги: {quote.tags.join(', ')}</p>}
+            {quote.tags?.length && <p>Тэги: {quote.tags.join(', ')}</p>}
             <div className="flex justify-items-start text-red-600">
                 <LikeOutlined onClick={likeHandler}/> {likes}
             </div>
